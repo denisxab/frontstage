@@ -7,14 +7,19 @@ services:
         restart: unless-stopped
         networks:
             - frontstage
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.2"
+                    memory: 128M
+                reservations:
+                    memory: 32M
 
     frontstage:
         build: .
         volumes:
-            # Монтируем каталог YAML — изменения без перезапуска контейнера
             - ./catalog:/app/catalog:ro
             - ./src:/app/src:ro
-            # Лог-файл доступен на хосте в ./logs/
             - ./logs:/app/logs
         expose:
             - 8080
@@ -29,6 +34,13 @@ services:
         networks:
             - my-proxy-network
             - frontstage
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.5"
+                    memory: 512M
+                reservations:
+                    memory: 128M
 
     nginx:
         image: nginx:1.27-alpine
@@ -41,6 +53,13 @@ services:
         restart: unless-stopped
         networks:
             - my-proxy-network
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.1"
+                    memory: 64M
+                reservations:
+                    memory: 16M
 
 networks:
     my-proxy-network:
