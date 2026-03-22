@@ -2,52 +2,52 @@
 
 # FrontStage
 
-Лёгкий open-source developer portal - альтернатива Backstage, которую удобно внедрить и сопровождать самостоятельно.
+A lightweight open-source developer portal — a Backstage alternative that's easy to deploy and maintain on your own.
 
-## Зачем FrontStage, если есть Backstage?
+## Why FrontStage if Backstage exists?
 
-Backstage мощный, но тяжёлый: Node.js, TypeScript, плагины на React, сложный деплой и высокий порог вхождения. FrontStage решает ту же задачу - единый портал для команд - без лишней сложности.
+Backstage is powerful but heavy: Node.js, TypeScript, React plugins, complex deployment, and a steep learning curve. FrontStage solves the same problem — a single portal for your teams — without the unnecessary complexity.
 
-| Категория         | FrontStage           | Backstage                  |
+| Category          | FrontStage           | Backstage                  |
 | ----------------- | -------------------- | -------------------------- |
-| Серверный стек    | Python / FastAPI     | Node.js / TypeScript       |
-| Фронтенд          | Alpine.js + Tailwind | React + Material UI        |
-| Конфиги           | YAML                 | YAML + TypeScript plugins  |
-| БД / Кеш          | Redis                | PostgreSQL                 |
-| Кастомизация      | Python / Jinja       | Плагинная система на React |
-| Лицензия          | MIT                  | Apache 2.0                 |
-| Рекомендуемый RAM | 1gb                  | 16gb                       |
-| Рекомендуемый CPU | 0.8cpu               | 4cpu                       |
+| Server stack      | Python / FastAPI     | Node.js / TypeScript       |
+| Frontend          | Alpine.js + Tailwind | React + Material UI        |
+| Configs           | YAML                 | YAML + TypeScript plugins  |
+| DB / Cache        | Redis                | PostgreSQL                 |
+| Customization     | Python / Jinja       | React plugin system        |
+| License           | MIT                  | Apache 2.0                 |
+| Recommended RAM   | 1 GB                 | 16 GB                      |
+| Recommended CPU   | 0.8 CPU              | 4 CPU                      |
 
-**Главные преимущества:**
+**Key advantages:**
 
-- DevOps понимает стек - Python. Не нужен отдельный фронтенд-разработчик.
-- Alpine.js вместо React: шаблоны прозрачны, легко дебажить и дорабатывать.
-- Swagger-документация из коробки - просто интегрировать любые бэкенды.
-- Простой и читаемый код в одной репе — кастомизации легко вносить самостоятельно или с помощью AI-ассистентов.
-- Отлично подходит для корпоративного AI/RAG: структурированные YAML-данные удобно индексировать.
-- Разработчик и комьюнити FrontStage уделяет внимание оптимизации потребления ресурсов
+- DevOps teams understand the stack — it's Python. No dedicated frontend developer needed.
+- Alpine.js instead of React: templates are transparent, easy to debug and extend.
+- Swagger documentation out of the box — straightforward to integrate any backends.
+- Simple, readable code in a single repo — easy to customize yourself or with AI assistants.
+- Great fit for enterprise AI/RAG: structured YAML data is easy to index.
+- The FrontStage developer and community focus on resource consumption optimization.
 
-_Проблемы Backstage - [debunking.md](./debunking.md)_
+_Backstage problems — [debunking.en.md](./debunking.en.md)_
 
-## Возможности
+## Features
 
 ### Software Catalog
 
-Централизованный реестр всех сервисов, библиотек, API, баз данных и их владельцев.
+A centralized registry of all services, libraries, APIs, databases, and their owners.
 
-Решает проблему "кто отвечает за этот микросервис?" - вся информация об инфраструктуре в одном месте, в Git, в читаемом формате.
+Solves the "who owns this microservice?" problem — all infrastructure information in one place, in Git, in a readable format.
 
-Объекты каталога: `Service`, `API`, `Database`, `Library`, `Team`.
+Catalog entities: `Service`, `API`, `Database`, `Library`, `Team`.
 
-## Быстрый старт
+## Quick Start
 
-Через LLM вы можете быстро сделать конфиги из вашей документации
+You can use an LLM to quickly generate configs from your existing documentation:
 
 ```bash
 mv catalog catalog_example
 
-claude -p 'На основание @docs/catalog/SPEC.md и примера @catalog_example - создай ./catalog для моей команды и сервисов: [Тут вставьте вашу доку]'
+claude -p 'Based on @docs/catalog/SPEC.md and the example in @catalog_example — create ./catalog for my team and services: [paste your docs here]'
 ```
 
 ```bash
@@ -55,7 +55,7 @@ docker network create my-proxy-network
 docker compose up -d --build
 ```
 
-Откройте: http://localhost:8795/
+Open: http://localhost:8795/
 
 ![main_page](./docs/main_page.png)
 
@@ -63,10 +63,10 @@ docker compose up -d --build
 
 ![team_page](./docs/team_page.png)
 
-## Технический стек
+## Tech Stack
 
-- **Сервер:** Python 3.10+, FastAPI, Jinja2, Nginx
-- **Фронтенд:** Alpine.js, Tailwind CSS
-- **Кеш:** Redis
-- **Конфиги:** YAML
-- **Деплой:** Docker, Docker Compose
+- **Server:** Python 3.10+, FastAPI, Jinja2, Nginx
+- **Frontend:** Alpine.js, Tailwind CSS
+- **Cache:** Redis
+- **Configs:** YAML
+- **Deploy:** Docker, Docker Compose
