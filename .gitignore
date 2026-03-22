@@ -7,3 +7,4 @@ venv
 .venv
 prompts.md
 .claude/prompts.md
+winvenv
