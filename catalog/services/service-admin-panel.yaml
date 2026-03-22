@@ -9,7 +9,7 @@ metadata:
     - title: "Prod"
       url: https://admin.beautytech.ru
     - title: "Репозиторий"
-      url: https://gitea.gerland.duckdns.org/denisxab/agents
+      url: https://gitea.server.org/userhab/agents
 spec:
   lifecycle: production
   owner: team:frontend

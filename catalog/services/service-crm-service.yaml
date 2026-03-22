@@ -7,7 +7,7 @@ metadata:
   tags: [python, fastapi, crm, clients]
   links:
     - title: "Репозиторий"
-      url: https://gitea.gerland.duckdns.org/denisxab/extapp
+      url: https://gitea.server.org/userhab/extapp
     - title: "Grafana"
       url: https://grafana.beautytech.ru/d/crm
       icon: grafana
