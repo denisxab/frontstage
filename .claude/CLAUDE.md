@@ -13,7 +13,7 @@
 **После каждого изменения кода или YAML** — запускать `invoke check`.
 Команды и алгоритм самопроверки: `.claude/SELFCHECK.md`.
 
-Деплой: nginx → uvicorn. Приложение: <http://localhost:8080>
+Деплой: nginx → uvicorn. Приложение: <http://localhost:8795>
 
 ## Актуализация документации
 

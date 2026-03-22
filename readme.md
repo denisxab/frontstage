@@ -53,7 +53,7 @@ docker network create my-proxy-network
 docker compose up -d --build
 ```
 
-Откройте: http://localhost:8080/
+Откройте: http://localhost:8795/
 
 ## Технический стек
 

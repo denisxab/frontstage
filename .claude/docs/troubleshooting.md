@@ -13,14 +13,14 @@
 
 ```bash
 # Список всех объектов каталога
-curl -s http://localhost:8080/api/catalog | python3 -c "
+curl -s http://localhost:8795/api/catalog | python3 -c "
 import sys, json
 for o in json.load(sys.stdin): print(o['kind'], o['metadata']['name'])
 "
 
 # Проверить конкретную страницу
-curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/catalog/service/user-service
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8795/catalog/service/user-service
 
 # API summary
-curl -s http://localhost:8080/api/catalog/summary | python3 -m json.tool
+curl -s http://localhost:8795/api/catalog/summary | python3 -m json.tool
 ```
