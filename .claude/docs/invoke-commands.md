@@ -61,6 +61,30 @@ invoke plugin-cache # все плагины
 invoke plugin-cache --plugin git_last_commit # конкретный плагин
 ```
 
+## Бенчмарк
+
+| Команда        | Описание                                              |
+| -------------- | ----------------------------------------------------- |
+| `invoke bench` | Apache Benchmark по ключевым URL на порту 8795        |
+
+### bench — аргументы
+
+```bash
+invoke bench          # 100 запросов, параллелизм 10
+invoke bench -n 500   # 500 запросов
+invoke bench -n 200 --c-=20  # 200 запросов, 20 потоков
+```
+
+> **ВАЖНО:** перед запуском установите `LOG_LEVEL=INFO`, иначе логи будут скрыты и результаты могут быть искажены:
+> ```bash
+> LOG_LEVEL=INFO invoke bench
+> ```
+
+URL для бенчмарка:
+- `http://localhost:8795/catalog/api`
+- `http://localhost:8795/catalog/service/crm-service`
+- `http://localhost:8795/catalog/api/esp-async`
+
 ## Разработка
 
 | Команда       | Описание                                      |

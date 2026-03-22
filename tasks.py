@@ -367,6 +367,39 @@ def plugin_cache(c, plugin=""):
 
 
 # ---------------------------------------------------------------
+# Бенчмарк
+# ---------------------------------------------------------------
+
+BENCH_URL = "http://localhost:8795"
+BENCH_URLS = [
+    f"{BENCH_URL}/catalog/api",
+    f"{BENCH_URL}/catalog/service/crm-service",
+    f"{BENCH_URL}/catalog/api/esp-async",
+]
+
+
+@task
+def bench(c, n=100, c_=25):
+    """Бенчмарк через Apache Benchmark (ab).
+
+    Запускать при LOG_LEVEL=INFO:
+      LOG_LEVEL=INFO invoke bench
+
+    Аргументы:
+      -n  — число запросов (по умолчанию 100)
+      -c  — уровень параллелизма (по умолчанию 25)
+    """
+    print("--- Apache Benchmark ---")
+    print("  ВАЖНО: для корректного бенчмарка установите LOG_LEVEL=INFO")
+    print(f"  Запросов: {n}, параллельно: {c_}")
+    for url in BENCH_URLS:
+        print(f"\n  >> {url}")
+        result = c.run(f"ab -n {n} -c {c_} {url}", warn=True)
+        if not result.ok:
+            _fail(f"ab завершился с ошибкой для {url}")
+
+
+# ---------------------------------------------------------------
 # Разработка
 # ---------------------------------------------------------------
 
@@ -415,6 +448,7 @@ ns.add_task(redis_ping, name="redis-ping")
 ns.add_task(redis_keys, name="redis-keys")
 ns.add_task(cache_del, name="cache-del")
 ns.add_task(plugin_cache, name="plugin-cache")
+ns.add_task(bench)
 ns.add_task(lint)
 ns.add_task(test)
 ns.add_task(lock)
