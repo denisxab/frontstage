@@ -1,8 +1,8 @@
+![logo](./docs/catalog/logo.png)
+
 # FrontStage
 
 Лёгкий open-source developer portal - альтернатива Backstage, которую удобно внедрить и сопровождать самостоятельно.
-
-![logo](docs\catalog\logo.png)
 
 ## Зачем FrontStage, если есть Backstage?
 
