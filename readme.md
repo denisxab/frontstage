@@ -2,6 +2,8 @@
 
 Лёгкий open-source developer portal - альтернатива Backstage, которую удобно внедрить и сопровождать самостоятельно.
 
+![logo](docs\catalog\logo.png)
+
 ## Зачем FrontStage, если есть Backstage?
 
 Backstage мощный, но тяжёлый: Node.js, TypeScript, плагины на React, сложный деплой и высокий порог вхождения. FrontStage решает ту же задачу - единый портал для команд - без лишней сложности.
