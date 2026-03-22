@@ -1,4 +1,4 @@
-![logo](./docs/catalog/logo.png)
+![logo](./docs/logo.png)
 
 # FrontStage
 
@@ -56,6 +56,8 @@ docker compose up -d --build
 ```
 
 Откройте: http://localhost:8795/
+
+![main_page](./docs/main_page.png)
 
 ## Технический стек
 
