@@ -59,6 +59,10 @@ docker compose up -d --build
 
 ![main_page](./docs/main_page.png)
 
+![link_page](./docs/link_page.png)
+
+![team_page](./docs/team_page.png)
+
 ## Технический стек
 
 - **Сервер:** Python 3.10+, FastAPI, Jinja2, Nginx
