@@ -4,14 +4,17 @@ FrontStage — задачи управления через Invoke.
 """
 
 import json
+import statistics
 import sys
+import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 from invoke import Collection, task
 
-APP_URL = "http://localhost:8080"
+APP_URL = "http://localhost:8795"
 CATALOG_DIR = Path("./catalog")
 SRC_DIR = Path("./src")
 
@@ -370,7 +373,7 @@ def plugin_cache(c, plugin=""):
 # Бенчмарк
 # ---------------------------------------------------------------
 
-BENCH_URL = "http://localhost:8795"
+BENCH_URL = APP_URL
 BENCH_URLS = [
     f"{BENCH_URL}/catalog/api",
     f"{BENCH_URL}/catalog/service/crm-service",
@@ -378,25 +381,119 @@ BENCH_URLS = [
 ]
 
 
+def _bench_url(url: str, n: int, concurrency: int, fail_fast: bool = False, token: str | None = None) -> dict:
+    """Выполняет n запросов к url с заданным параллелизмом, возвращает статистику."""
+    latencies = []
+    errors = 0
+    first_error: str | None = None
+    stop_event = threading.Event()
+    lock = threading.Lock()
+
+    def worker(count):
+        nonlocal errors, first_error
+        for _ in range(count):
+            if stop_event.is_set():
+                break
+            t0 = time.perf_counter()
+            error_msg = None
+            try:
+                req = urllib.request.Request(url)
+                if token:
+                    req.add_header("X-API-Key", f"{token}")
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    r.read()
+                    if not (200 <= r.status < 400):
+                        error_msg = f"HTTP {r.status}"
+            except urllib.error.HTTPError as e:
+                error_msg = f"HTTP {e.code} {e.reason}"
+            except urllib.error.URLError as e:
+                error_msg = f"URLError: {e.reason}"
+            except Exception as e:
+                error_msg = str(e)
+            elapsed = (time.perf_counter() - t0) * 1000  # мс
+            with lock:
+                if error_msg is None:
+                    latencies.append(elapsed)
+                else:
+                    errors += 1
+                    if first_error is None:
+                        first_error = error_msg
+                    if fail_fast:
+                        stop_event.set()
+
+    # Распределяем запросы по потокам
+    base, extra = divmod(n, concurrency)
+    threads = []
+    for i in range(concurrency):
+        cnt = base + (1 if i < extra else 0)
+        t = threading.Thread(target=worker, args=(cnt,))
+        threads.append(t)
+
+    t_start = time.perf_counter()
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    total_time = time.perf_counter() - t_start
+
+    if latencies:
+        latencies.sort()
+        p50 = statistics.median(latencies)
+        p95 = latencies[int(len(latencies) * 0.95)]
+        p99 = latencies[int(len(latencies) * 0.99)]
+        mean = statistics.mean(latencies)
+        min_ = latencies[0]
+        max_ = latencies[-1]
+    else:
+        p50 = p95 = p99 = mean = min_ = max_ = 0.0
+
+    completed = len(latencies) + errors
+    return {
+        "total": completed,
+        "ok": len(latencies),
+        "errors": errors,
+        "first_error": first_error,
+        "rps": round(completed / total_time, 1) if total_time > 0 else 0.0,
+        "mean_ms": round(mean, 1),
+        "min_ms": round(min_, 1),
+        "max_ms": round(max_, 1),
+        "p50_ms": round(p50, 1),
+        "p95_ms": round(p95, 1),
+        "p99_ms": round(p99, 1),
+    }
+
+
 @task
-def bench(c, n=100, c_=25):
-    """Бенчмарк через Apache Benchmark (ab).
+def bench(c, n=1000, c_=100, fail_fast=False, token=None):
+    """Бенчмарк на чистом Python (без ab).
 
     Запускать при LOG_LEVEL=INFO:
       LOG_LEVEL=INFO invoke bench
 
     Аргументы:
-      -n  — число запросов (по умолчанию 100)
-      -c  — уровень параллелизма (по умолчанию 25)
+      -n           — число запросов (по умолчанию 100)
+      -c           — уровень параллелизма (по умолчанию 25)
+      --fail-fast  — остановить при первой ошибке и показать причину
+      --token      — API-токен (передаётся в заголовке X-API-Key)
     """
-    print("--- Apache Benchmark ---")
+    print("--- Benchmark ---")
     print("  ВАЖНО: для корректного бенчмарка установите LOG_LEVEL=INFO")
-    print(f"  Запросов: {n}, параллельно: {c_}")
+    print(f"  Запросов: {n}, параллельно: {c_}, fail-fast: {bool(fail_fast)}")
+    if token:
+        print("  Авторизация: Bearer ***")
     for url in BENCH_URLS:
         print(f"\n  >> {url}")
-        result = c.run(f"ab -n {n} -c {c_} {url}", warn=True)
-        if not result.ok:
-            _fail(f"ab завершился с ошибкой для {url}")
+        s = _bench_url(url, int(n), int(c_), fail_fast=bool(fail_fast), token=token)
+        print(f"     Всего: {s['total']}  OK: {s['ok']}  Ошибок: {s['errors']}")
+        print(f"     RPS:  {s['rps']}")
+        print(f"     Latency (мс): mean={s['mean_ms']}  min={s['min_ms']}  max={s['max_ms']}")
+        print(f"     Percentiles:  p50={s['p50_ms']}  p95={s['p95_ms']}  p99={s['p99_ms']}")
+        if s["errors"] > 0:
+            print(f"  ПРЕДУПРЕЖДЕНИЕ: {s['errors']} запросов завершились с ошибкой")
+            if s["first_error"]:
+                print(f"  Первая ошибка: {s['first_error']}")
+            if fail_fast:
+                _fail("Остановлено из-за ошибки (--fail-fast)")
 
 
 # ---------------------------------------------------------------
