@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Software Catalog — FrontStage{% endblock %}
+
+{% block content %}
+<script>
+  window._catalogObjects = {{ objects | tojson }};
+</script>
+
+<div x-data="{
+  search: '',
+  activeKind: '',
+  view: 'grid',
+  objects: window._catalogObjects,
+  get filtered() {
+    return this.objects.filter(o => {
+      const matchKind = !this.activeKind || o.kind.toLowerCase() === this.activeKind;
+      const q = this.search.toLowerCase();
+      const matchSearch = !q
+        || o.metadata.name.includes(q)
+        || o.metadata.title.toLowerCase().includes(q)
+        || (o.metadata.description || '').toLowerCase().includes(q)
+        || (o.metadata.tags || []).some(t => t.includes(q));
+      return matchKind && matchSearch;
+    });
+  },
+  kindIcon(kind) {
+    const m = { service: '⚙', api: '⇄', database: '◫', library: '⬡', team: '◎' };
+    return m[kind.toLowerCase()] || '○';
+  }
+}">
+
+  <!-- Топбар -->
+  <div class="topbar flex items-center justify-between px-6 h-12 border-b" style="background:#1a1d27; border-color:#2e3347;">
+    <span class="text-sm font-semibold" style="color:#8892a4;">
+      Software Catalog
+      <span style="color:#e2e8f0;" x-text="' · ' + filtered.length + ' ' + (filtered.length === 1 ? 'объект' : filtered.length < 5 ? 'объекта' : 'объектов')"></span>
+    </span>
+    <div class="flex items-center gap-2">
+      <!-- Вид: сетка / список -->
+      <button @click="view = 'grid'" title="Сетка"
+              class="px-2 py-1 rounded text-xs border transition-colors cursor-pointer"
+              :class="view === 'grid' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-transparent text-gray-400 hover:text-gray-200'">⊞</button>
+      <button @click="view = 'list'" title="Список"
+              class="px-2 py-1 rounded text-xs border transition-colors cursor-pointer"
+              :class="view === 'list' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-transparent text-gray-400 hover:text-gray-200'">☰</button>
+      <!-- Reload — только для админа -->
+      {% if is_admin %}
+      <button @click="fetch('/api/catalog/reload', {method:'POST'}).then(() => location.reload())"
+              class="px-3 py-1 rounded text-xs border transition-colors cursor-pointer"
+              style="border-color:#2e3347; color:#8892a4;" title="Перезагрузить из файлов">
+        ↺ Reload catalog
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="p-6">
+
+    <!-- Поиск + фильтры -->
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <!-- Поиск -->
+      <div class="relative" style="flex:1; min-width:200px; max-width:400px;">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#5a6478;">⌕</span>
+        <input x-model="search" type="text" placeholder="Поиск по имени, описанию, тегам…" autofocus
+               class="w-full pl-8 pr-3 py-1.5 rounded text-sm outline-none transition-colors"
+               style="background:#252836; border:1px solid #2e3347; color:#e2e8f0;"
+               onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#2e3347'" />
+      </div>
+      <!-- Фильтры по kind -->
+      <div class="flex flex-wrap gap-1">
+        <button @click="activeKind = ''"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === '' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">Все</button>
+        <button @click="activeKind = activeKind === 'service' ? '' : 'service'"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === 'service' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">⚙ Services</button>
+        <button @click="activeKind = activeKind === 'api' ? '' : 'api'"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === 'api' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">⇄ APIs</button>
+        <button @click="activeKind = activeKind === 'database' ? '' : 'database'"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === 'database' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">◫ DBs</button>
+        <button @click="activeKind = activeKind === 'library' ? '' : 'library'"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === 'library' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">⬡ Libs</button>
+        <button @click="activeKind = activeKind === 'team' ? '' : 'team'"
+                class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+                :class="activeKind === 'team' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">◎ Teams</button>
+      </div>
+    </div>
+
+    <!-- Стат-панель (скрывается при фильтре) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" x-show="!activeKind && !search">
+      {% for kind, count in summary.by_kind.items() %}
+      <div class="rounded-lg border p-3 cursor-pointer transition-colors hover:border-indigo-500"
+           style="background:#1a1d27; border-color:#2e3347;"
+           @click="activeKind = '{{ kind.lower() }}'">
+        <div class="flex items-center justify-between">
+          <span class="badge badge-{{ kind.lower() }} text-xs font-semibold uppercase px-2 py-0.5 rounded">{{ kind }}</span>
+          <span class="text-xl font-bold" style="color:#e2e8f0;">{{ count }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ── Грид-вид ── -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" x-show="view === 'grid'">
+      <template x-for="obj in filtered" :key="obj.kind + ':' + obj.metadata.name">
+        <a :href="'/catalog/' + obj.kind.toLowerCase() + '/' + obj.metadata.name"
+           class="block no-underline group">
+          <div class="h-full rounded-lg border p-4 transition-colors group-hover:border-indigo-500"
+               style="background:#1a1d27; border-color:#2e3347;">
+            <!-- Kind + lifecycle -->
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge text-xs font-semibold uppercase px-2 py-0.5 rounded"
+                    :class="'badge-' + obj.kind.toLowerCase()"
+                    x-text="kindIcon(obj.kind) + ' ' + obj.kind"></span>
+              <span class="text-xs font-semibold uppercase lc"
+                    :class="'lc-' + (obj.spec.lifecycle || '')"
+                    x-show="obj.spec.lifecycle"
+                    x-text="obj.spec.lifecycle"></span>
+              <span class="ml-auto text-xs" style="color:#5a6478;" x-show="obj.spec.type" x-text="obj.spec.type"></span>
+            </div>
+            <!-- Название -->
+            <h3 class="font-semibold text-sm truncate mb-0.5" style="color:#e2e8f0;" x-text="obj.metadata.title"></h3>
+            <p class="font-mono text-xs" style="color:#5a6478;" x-text="obj.metadata.name"></p>
+            <!-- Описание -->
+            <p class="text-xs mt-2 line-clamp-2" style="color:#8892a4;"
+               x-show="obj.metadata.description" x-text="obj.metadata.description"></p>
+            <!-- Теги + owner -->
+            <div class="flex items-center justify-between mt-3 gap-2">
+              <div class="flex flex-wrap gap-1" x-show="obj.metadata.tags && obj.metadata.tags.length">
+                <template x-for="tag in (obj.metadata.tags || []).slice(0,3)" :key="tag">
+                  <span class="text-xs px-1.5 py-0.5 rounded border" style="background:#252836; border-color:#2e3347; color:#8892a4;" x-text="tag"></span>
+                </template>
+                <span class="text-xs px-1.5 py-0.5 rounded border" style="background:#252836; border-color:#2e3347; color:#5a6478;"
+                      x-show="(obj.metadata.tags || []).length > 3"
+                      x-text="'+' + ((obj.metadata.tags || []).length - 3)"></span>
+              </div>
+              <span class="text-xs shrink-0" style="color:#5a6478;" x-show="obj.spec.owner" x-text="obj.spec.owner"></span>
+            </div>
+          </div>
+        </a>
+      </template>
+    </div>
+
+    <!-- ── Список-вид ── -->
+    <div x-show="view === 'list'" class="rounded-lg border overflow-hidden" style="background:#1a1d27; border-color:#2e3347;">
+      <template x-for="(obj, idx) in filtered" :key="obj.kind + ':' + obj.metadata.name">
+        <a :href="'/catalog/' + obj.kind.toLowerCase() + '/' + obj.metadata.name"
+           class="flex items-center gap-3 px-4 py-3 no-underline transition-colors hover:bg-white/5"
+           :style="idx < filtered.length - 1 ? 'border-bottom:1px solid #2e3347;' : ''">
+          <span class="badge text-xs font-semibold uppercase px-2 py-0.5 rounded shrink-0"
+                :class="'badge-' + obj.kind.toLowerCase()"
+                style="min-width:72px; text-align:center;" x-text="obj.kind"></span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-sm" style="color:#e2e8f0;" x-text="obj.metadata.title"></span>
+              <span class="text-xs font-semibold uppercase lc"
+                    :class="'lc-' + (obj.spec.lifecycle || '')"
+                    x-show="obj.spec.lifecycle" x-text="obj.spec.lifecycle"></span>
+            </div>
+            <span class="font-mono text-xs" style="color:#5a6478;" x-text="obj.metadata.name"></span>
+          </div>
+          <span class="text-xs truncate hidden md:block" style="max-width:280px; color:#8892a4;"
+                x-show="obj.metadata.description" x-text="obj.metadata.description"></span>
+          <span class="text-xs shrink-0 hidden sm:block" style="color:#5a6478;" x-show="obj.spec.owner" x-text="obj.spec.owner"></span>
+          <span style="color:#5a6478;">›</span>
+        </a>
+      </template>
+    </div>
+
+    <!-- Empty state -->
+    <div x-show="filtered.length === 0" class="text-center py-16">
+      <div class="text-4xl mb-3 opacity-30">◌</div>
+      <p class="text-sm" style="color:#8892a4;">Ничего не найдено</p>
+      <button class="mt-3 px-4 py-1.5 rounded text-xs border cursor-pointer transition-colors"
+              style="border-color:#2e3347; color:#8892a4;"
+              x-show="search || activeKind"
+              @click="search = ''; activeKind = ''">Сбросить фильтры</button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

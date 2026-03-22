@@ -1,0 +1,24 @@
+apiVersion: frontstage/v1
+kind: Team
+metadata:
+  name: backend
+  title: "Backend Team"
+  description: "Разработка серверной части платформы BeautyTech: CRM, закупки, склад, логистика"
+  tags: [python, fastapi, postgresql]
+  links:
+    - title: "Confluence"
+      url: https://wiki.beautytech.ru/teams/backend
+spec:
+  members:
+    - name: "Иван Петров"
+      email: "i.petrov@beautytech.ru"
+      role: lead
+    - name: "Мария Сидорова"
+      email: "m.sidorova@beautytech.ru"
+      role: developer
+    - name: "Алексей Козлов"
+      email: "a.kozlov@beautytech.ru"
+      role: developer
+    - name: "Светлана Громова"
+      email: "s.gromova@beautytech.ru"
+      role: qa

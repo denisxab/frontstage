@@ -1,0 +1,23 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: procurement-service
+  title: "Procurement Service"
+  description: "Управление закупками косметических препаратов: заявки поставщикам, согласование, приёмка"
+  tags: [python, fastapi, procurement, b2b]
+  links:
+    - title: "Репозиторий"
+      url: https://git.beautytech.ru/backend/procurement-service
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: backend
+  dependsOn:
+    - database:orders-postgres
+    - database:session-redis
+    - api:internal-grpc
+  providesApis:
+    - api:procurement-rest-api
+  deployments:
+    - host: german
+      status: healthy

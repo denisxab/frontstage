@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Вход — FrontStage</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#0f1117',
+            surface: '#1a1d27',
+            border:  '#2e3347',
+            accent:  '#6366f1',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background: #0f1117; color: #e2e8f0; }
+  </style>
+</head>
+<body class="font-sans text-sm flex items-center justify-center min-h-screen">
+
+<div class="w-full max-w-sm">
+  <div class="rounded-xl p-8" style="background:#1a1d27; border:1px solid #2e3347;">
+
+    <!-- Логотип -->
+    <div class="text-center mb-8">
+      <div class="text-2xl font-bold tracking-tight mb-1">
+        Front<span style="color:#6366f1;">Stage</span>
+      </div>
+      <div class="text-xs" style="color:#5a6478;">developer portal</div>
+    </div>
+
+    <!-- Ошибка -->
+    {% if request.query_params.get('error') %}
+    <div class="mb-4 px-3 py-2 rounded-lg text-xs" style="background:#2a1a1a; color:#ef4444; border:1px solid rgba(239,68,68,0.3);">
+      Неверный ключ
+    </div>
+    {% endif %}
+
+    <!-- Форма -->
+    <form method="post" action="/login">
+      <label class="block text-xs font-medium mb-1.5" style="color:#8892a4;">
+        API-ключ
+      </label>
+      <input
+        name="api_key"
+        type="password"
+        placeholder="Введите API-ключ..."
+        autocomplete="current-password"
+        autofocus
+        class="w-full px-3 py-2 rounded-lg text-sm outline-none"
+        style="background:#252836; border:1px solid #2e3347; color:#e2e8f0;"
+        onfocus="this.style.borderColor='#6366f1'"
+        onblur="this.style.borderColor='#2e3347'"
+      />
+
+      <button
+        type="submit"
+        class="mt-4 w-full py-2 rounded-lg text-sm font-medium"
+        style="background:#6366f1; color:white;"
+      >
+        Войти
+      </button>
+    </form>
+
+  </div>
+</div>
+
+</body>
+</html>

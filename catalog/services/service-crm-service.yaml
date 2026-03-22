@@ -1,0 +1,29 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: crm-service
+  title: "CRM Service"
+  description: "Ядро CRM: карточки клиентов, история визитов, программы лояльности, сегментация"
+  tags: [python, fastapi, crm, clients]
+  links:
+    - title: "Репозиторий"
+      url: https://gitea.gerland.duckdns.org/denisxab/extapp
+    - title: "Grafana"
+      url: https://grafana.beautytech.ru/d/crm
+      icon: grafana
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: backend
+  dependsOn:
+    - database:clients-postgres
+    - database:session-redis
+    - database:events-kafka
+    - service:admin-panel
+  providesApis:
+    - api:public-rest-api
+    - api:internal-grpc
+  deployments:
+    - host: german
+      url: https://crm.beautytech.ru
+      status: healthy

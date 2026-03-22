@@ -1,0 +1,21 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: inventory-service
+  title: "Inventory Service"
+  description: "Складской учёт: остатки косметических препаратов, списание на процедуры, инвентаризация"
+  tags: [python, fastapi, inventory, warehouse]
+  links:
+    - title: "Репозиторий"
+      url: https://git.beautytech.ru/backend/inventory-service
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: backend
+  dependsOn:
+    - database:orders-postgres
+    - database:products-elasticsearch
+    - api:internal-grpc
+  deployments:
+    - host: german
+      status: healthy

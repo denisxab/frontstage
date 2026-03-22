@@ -1,0 +1,19 @@
+apiVersion: frontstage/v1
+kind: Team
+metadata:
+  name: data
+  title: "Data & Analytics Team"
+  description: "Аналитика клиентского поведения, отчёты по продажам и эффективности ESP-кампаний"
+  tags: [python, clickhouse, grafana, analytics]
+  links:
+    - title: "Confluence"
+      url: https://wiki.beautytech.ru/teams/data
+      icon: confluence
+spec:
+  members:
+    - name: "Елена Зайцева"
+      email: "e.zaitseva@beautytech.ru"
+      role: lead
+    - name: "Роман Орлов"
+      email: "r.orlov@beautytech.ru"
+      role: developer

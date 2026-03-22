@@ -1,0 +1,48 @@
+services:
+    redis:
+        image: redis:7-alpine
+        command: redis-server --appendonly yes
+        volumes:
+            - ./data/redis_data:/data
+        restart: unless-stopped
+        networks:
+            - frontstage
+
+    frontstage:
+        build: .
+        volumes:
+            # Монтируем каталог YAML — изменения без перезапуска контейнера
+            - ./catalog:/app/catalog:ro
+            - ./src:/app/src:ro
+            # Лог-файл доступен на хосте в ./logs/
+            - ./logs:/app/logs
+        expose:
+            - 8080
+        env_file:
+            - .env
+        environment:
+            CATALOG_DIR: /app/catalog
+            REDIS_URL: redis://redis:6379
+        depends_on:
+            - redis
+        restart: unless-stopped
+        networks:
+            - my-proxy-network
+            - frontstage
+
+    nginx:
+        image: nginx:1.27-alpine
+        ports:
+            - "127.0.0.1:8795:80"
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        depends_on:
+            - frontstage
+        restart: unless-stopped
+        networks:
+            - my-proxy-network
+
+networks:
+    my-proxy-network:
+        external: true
+    frontstage:

@@ -1,0 +1,21 @@
+# Пример: kind: Library
+# Описывает переиспользуемую библиотеку или пакет
+
+apiVersion: frontstage/v1
+kind: Library
+metadata:
+  name: common-utils
+  title: "Common Utils"
+  description: "Общие утилиты: логирование, конфиги, хелперы для HTTP"
+  tags: [python, internal]
+  links:
+    - title: "PyPI (internal)"
+      url: https://pypi.example.com/common-utils
+    - title: "Репозиторий"
+      url: https://git.example.com/common-utils
+
+spec:
+  lifecycle: production
+  owner: team:backend
+  language: python                      # python | go | typescript | java | ...
+  version: "1.4.2"

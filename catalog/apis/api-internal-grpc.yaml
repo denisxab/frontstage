@@ -1,0 +1,11 @@
+apiVersion: frontstage/v1
+kind: API
+metadata:
+  name: internal-grpc
+  title: "Internal gRPC"
+  description: "Высокоскоростной межсервисный интерфейс: CRM ↔ склад ↔ логистика ↔ ESP"
+  tags: [grpc, internal, microservices]
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: grpc

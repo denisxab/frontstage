@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "frontstage"
+version = "0.1.0"
+description = "Лёгкий open-source developer portal для DevOps-команд"
+authors = []
+readme = "readme.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "0.115.0"
+uvicorn = { version = "0.30.6", extras = ["standard"] }
+jinja2 = "3.1.4"
+pyyaml = "6.0.2"
+pydantic = { version = "2.9.2", extras = ["email"] }
+python-multipart = "0.0.9"
+invoke = "2.2.0"
+mistune = "^3.2.0"
+redis = { version = "^5.0", extras = ["asyncio"] }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "8.3.3"
+pytest-asyncio = ">=0.23"
+httpx = "0.27.2"
+ruff = ">=0.4.0"
+fakeredis = { version = ">=2.23", extras = ["aioredis"] }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src/plugins"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::ResourceWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# HTML внутри f-строк плагинов объективно длиннее 100 символов
+"src/plugins/*/plugin.py" = ["E501"]

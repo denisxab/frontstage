@@ -1,0 +1,14 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: products-elasticsearch
+  title: "Products Elasticsearch"
+  description: "Полнотекстовый поиск по каталогу косметических продуктов и услуг для клиник"
+  tags: [elasticsearch, search, catalog, products]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: elasticsearch
+  version: "8.11"
+  deployments:
+    - host: rus

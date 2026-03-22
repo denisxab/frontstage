@@ -1,0 +1,22 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: frontend-app
+  title: "Client Portal"
+  description: "Веб-приложение для клиентов клиник: онлайн-запись, история процедур, баллы лояльности"
+  tags: [typescript, vue, tailwind, spa]
+  links:
+    - title: "Prod"
+      url: https://app.beautytech.ru
+    - title: "Staging"
+      url: https://staging.beautytech.ru
+spec:
+  lifecycle: production
+  owner: team:frontend
+  type: frontend
+  dependsOn:
+    - api:public-rest-api
+  deployments:
+    - host: german
+      url: https://app.beautytech.ru
+      status: healthy

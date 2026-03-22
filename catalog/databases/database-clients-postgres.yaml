@@ -1,0 +1,15 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: clients-postgres
+  title: "Clients PostgreSQL"
+  description: "База клиентов косметологических клиник: карточки, история визитов, программы лояльности"
+  tags: [postgresql, crm, clients]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: postgresql
+  version: "15.4"
+  deployments:
+    - host: german
+      database: beautytech_clients

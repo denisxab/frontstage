@@ -1,0 +1,16 @@
+apiVersion: frontstage/v1
+kind: API
+metadata:
+  name: procurement-rest-api
+  title: "Procurement REST API"
+  description: "API управления закупками: создание заявок поставщикам, согласование, приёмка товара"
+  tags: [rest, procurement, internal, b2b]
+  links:
+    - title: "Swagger UI"
+      url: https://api.beautytech.ru/procurement/docs
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: rest
+  definition:
+    url: https://api.beautytech.ru/procurement/openapi.json

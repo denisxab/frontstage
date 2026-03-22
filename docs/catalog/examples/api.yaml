@@ -1,0 +1,29 @@
+# Пример: kind: API
+# Описывает интерфейс взаимодействия — REST, gRPC, GraphQL или очередь сообщений
+
+apiVersion: frontstage/v1
+kind: API
+metadata:
+  name: public-rest-api
+  title: "Public REST API"
+  description: "Публичный REST API для мобильных и веб-клиентов"
+  tags: [rest, openapi, public]
+  links:
+    - title: "Swagger UI"
+      url: https://api.example.com/docs
+
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: rest                            # rest | grpc | graphql | async
+
+  # Спецификация — ссылка на файл или inline
+  definition:
+    url: https://api.example.com/openapi.json
+    # Альтернатива — вставить спецификацию прямо сюда:
+    # inline: |
+    #   openapi: 3.0.0
+    #   info:
+    #     title: Public REST API
+    #     version: "1.0"
+    #   paths: ...

@@ -1,0 +1,38 @@
+# Пример: kind: Service
+# Описывает микросервис, приложение, воркер или cronjob
+
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: user-service                    # уникальный slug (латиница, дефис)
+  title: "User Service"                 # человекочитаемое название
+  description: "Управление пользователями и аутентификацией"
+  tags: [python, fastapi, auth]
+  links:
+    - title: "Репозиторий"
+      url: https://git.example.com/user-service
+    - title: "Документация"
+      url: https://docs.example.com/user-service
+    - title: "Grafana Dashboard"
+      url: https://grafana.example.com/d/user-service
+
+spec:
+  lifecycle: production                 # production | staging | experimental | deprecated
+  owner: team:backend                   # ссылка на kind: Team
+  type: backend                         # backend | frontend | cli | worker | cronjob
+
+  # Что этот сервис использует
+  dependsOn:
+    - database:users-postgres
+    - service:notification-service
+    - api:internal-grpc
+
+  # Какие API предоставляет этот сервис
+  providesApis:
+    - api:public-rest-api
+
+  # Где задеплоен (один сервис может быть на нескольких хостах)
+  deployments:
+    - host: german
+      url: https://users.example.com
+      status: healthy                   # healthy | degraded | down | unknown

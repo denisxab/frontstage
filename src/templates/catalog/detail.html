@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% from "macros/link_icon.html" import link_icon %}
+
+{% block title %}{{ obj.metadata.title }} — FrontStage{% endblock %}
+
+{% block content %}
+{% set kind_icons = {'Service': '⚙', 'API': '⇄', 'Database': '◫', 'Library': '⬡', 'Team': '◎'} %}
+
+<!-- ── Шапка ── -->
+<div class="border-b px-6 py-5" style="background:#1a1d27; border-color:#2e3347;">
+
+  <!-- Хлебные крошки -->
+  <div class="flex items-center gap-1.5 text-xs mb-4" style="color:#8892a4;">
+    <a href="/" class="no-underline transition-colors hover:text-white" style="color:#8892a4;">Каталог</a>
+    <span style="color:#5a6478;">/</span>
+    <a href="/catalog/{{ obj.kind | lower }}" class="no-underline transition-colors hover:text-white" style="color:#8892a4;">{{ obj.kind }}</a>
+    <span style="color:#5a6478;">/</span>
+    <span style="color:#e2e8f0;">{{ obj.metadata.name }}</span>
+  </div>
+
+  <!-- Kind + lifecycle + type -->
+  <div class="flex flex-wrap items-center gap-2 mb-2">
+    <span class="badge badge-{{ obj.kind | lower }} text-xs font-semibold uppercase px-2 py-0.5 rounded">
+      {{ kind_icons.get(obj.kind, '○') }} {{ obj.kind }}
+    </span>
+    {% if obj.spec.lifecycle %}
+    <span class="lc lc-{{ obj.spec.lifecycle }} text-xs font-semibold uppercase">{{ obj.spec.lifecycle }}</span>
+    {% endif %}
+    {% if obj.spec.get('type') %}
+    <span class="text-xs px-1.5 py-0.5 rounded border" style="background:#252836; border-color:#2e3347; color:#8892a4;">{{ obj.spec.type }}</span>
+    {% endif %}
+  </div>
+
+  <h1 class="text-lg font-bold mb-1" style="color:#e2e8f0;">{{ obj.metadata.title }}</h1>
+  <div class="font-mono text-xs" style="color:#5a6478;">{{ obj.metadata.name }}</div>
+
+  {% if obj.metadata.description %}
+  <p class="text-sm mt-2" style="color:#8892a4; max-width:680px; line-height:1.5;">{{ obj.metadata.description }}</p>
+  {% endif %}
+
+  <!-- Теги -->
+  {% if obj.metadata.tags %}
+  <div class="flex flex-wrap gap-1 mt-3">
+    {% for tag in obj.metadata.tags %}
+    <span class="text-xs px-1.5 py-0.5 rounded border" style="background:#252836; border-color:#2e3347; color:#8892a4;">{{ tag }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Ссылки -->
+  {% if obj.metadata.links %}
+  <div class="flex flex-wrap gap-2 mt-3">
+    {% for link in obj.metadata.links %}
+    <a href="{{ link.url }}" target="_blank"
+       class="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs border no-underline transition-colors hover:border-indigo-500 hover:text-white"
+       style="border-color:#2e3347; color:#8892a4;">{{ link_icon(link) }} {{ link.title }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- ── Тело ── -->
+<div x-data="{ tab: 'overview' }" class="p-6">
+
+  <!-- Табы -->
+  <div class="flex gap-1 mb-6 pb-3 border-b" style="border-color:#2e3347;">
+    <button @click="tab = 'overview'"
+            class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+            :class="tab === 'overview' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">
+      Обзор
+    </button>
+    {% if resolved_deps or dependents or provides_apis %}
+    <button @click="tab = 'relations'"
+            class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+            :class="tab === 'relations' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">
+      Связи <span class="opacity-60">{{ (resolved_deps | length) + (dependents | length) + (provides_apis | length) }}</span>
+    </button>
+    {% endif %}
+    {% if obj.spec.get('deployments') %}
+    <button @click="tab = 'deploy'"
+            class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+            :class="tab === 'deploy' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">
+      Deployments <span class="opacity-60">{{ obj.spec.deployments | length }}</span>
+    </button>
+    {% endif %}
+    {% if obj.spec.get('members') %}
+    <button @click="tab = 'members'"
+            class="px-3 py-1 rounded text-xs border cursor-pointer transition-colors"
+            :class="tab === 'members' ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500'">
+      Участники <span class="opacity-60">{{ obj.spec.members | length }}</span>
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- ── Таб: Обзор ── -->
+  <div x-show="tab === 'overview'">
+    <div class="grid gap-4" style="grid-template-columns: 1fr 300px; align-items: start;">
+
+      <!-- Левая колонка -->
+      <div class="space-y-4" style="min-width:0;">
+
+        {% if obj.spec.get('members') %}
+        <!-- Участники команды -->
+        <div class="rounded-lg border p-4" style="background:#1a1d27; border-color:#2e3347;">
+          <h2 class="text-sm font-semibold mb-3" style="color:#e2e8f0;">Участники команды</h2>
+          <div class="divide-y" style="--tw-divide-opacity:1;">
+            {% for m in obj.spec.members %}
+            <div class="flex items-center gap-3 py-2.5">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                   style="background:#1e2045; color:#818cf8; border:1px solid #2e3047;">
+                {{ m.name[0] | upper }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm" style="color:#e2e8f0;">{{ m.name }}</div>
+                {% if m.get('email') %}
+                <div class="text-xs" style="color:#5a6478;">{{ m.email }}</div>
+                {% endif %}
+              </div>
+              {% if m.get('role') %}
+              <span class="text-xs px-1.5 py-0.5 rounded border shrink-0"
+                    style="background:#252836; border-color:#2e3347; color:#8892a4;">{{ m.role }}</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if obj.spec.get('definition') %}
+        <!-- API definition -->
+        <div class="rounded-lg border p-4" style="background:#1a1d27; border-color:#2e3347;">
+          <h2 class="text-sm font-semibold mb-3" style="color:#e2e8f0;">Спецификация API</h2>
+          {% if obj.spec.definition.get('url') %}
+          <a href="{{ obj.spec.definition.url }}" target="_blank"
+             class="inline-flex items-center gap-1 px-3 py-1 rounded text-xs border no-underline mb-3 transition-colors hover:border-indigo-500 hover:text-white"
+             style="border-color:#2e3347; color:#8892a4;">↗ Открыть спецификацию</a>
+          {% endif %}
+          {% if obj.spec.definition.get('inline') %}
+          <pre class="rounded p-3 text-xs overflow-auto font-mono" style="background:#252836; color:#8892a4; line-height:1.5;">{{ obj.spec.definition.inline }}</pre>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Панели плагинов -->
+        {% for panel_html in plugin_panels %}
+          {{ panel_html | safe }}
+        {% endfor %}
+      </div>
+
+      <!-- Правая колонка: info panel -->
+      <div class="rounded-lg border p-4" style="background:#1a1d27; border-color:#2e3347;">
+        <h2 class="text-sm font-semibold mb-3" style="color:#e2e8f0;">Информация</h2>
+        <table class="w-full text-xs">
+          {% if obj.spec.get('owner') %}
+          <tr>
+            <td class="py-1.5 pr-3 whitespace-nowrap" style="color:#8892a4; width:110px;">Владелец</td>
+            <td class="py-1.5">
+              {% if owner_obj %}
+              <a href="/catalog/team/{{ owner_obj.metadata.name }}" class="no-underline" style="color:#6366f1;">◎ {{ obj.spec.owner }}</a>
+              {% else %}{{ obj.spec.owner }}{% endif %}
+            </td>
+          </tr>
+          {% endif %}
+          {% if obj.spec.get('lifecycle') %}
+          <tr>
+            <td class="py-1.5 pr-3" style="color:#8892a4;">Lifecycle</td>
+            <td class="py-1.5 lc lc-{{ obj.spec.lifecycle }} font-semibold uppercase">{{ obj.spec.lifecycle }}</td>
+          </tr>
+          {% endif %}
+          {% if obj.spec.get('type') %}
+          <tr>
+            <td class="py-1.5 pr-3" style="color:#8892a4;">Тип</td>
+            <td class="py-1.5" style="color:#e2e8f0;">{{ obj.spec.type }}</td>
+          </tr>
+          {% endif %}
+          {% if obj.spec.get('engine') %}
+          <tr>
+            <td class="py-1.5 pr-3" style="color:#8892a4;">Engine</td>
+            <td class="py-1.5" style="color:#e2e8f0;">{{ obj.spec.engine }}</td>
+          </tr>
+          {% endif %}
+          {% if obj.spec.get('version') %}
+          <tr>
+            <td class="py-1.5 pr-3" style="color:#8892a4;">Версия</td>
+            <td class="py-1.5 font-mono" style="color:#e2e8f0;">{{ obj.spec.version }}</td>
+          </tr>
+          {% endif %}
+          {% if obj.spec.get('language') %}
+          <tr>
+            <td class="py-1.5 pr-3" style="color:#8892a4;">Язык</td>
+            <td class="py-1.5" style="color:#e2e8f0;">{{ obj.spec.language }}</td>
+          </tr>
+          {% endif %}
+        </table>
+
+        {% if resolved_deps %}
+        <div class="border-t mt-3 pt-3" style="border-color:#2e3347;">
+          <div class="text-xs font-semibold uppercase mb-2" style="color:#5a6478; letter-spacing:0.05em;">Зависимости</div>
+          <div class="space-y-1">
+            {% for dep in resolved_deps %}
+            {% if dep.obj %}
+            <a href="/catalog/{{ dep.obj.kind | lower }}/{{ dep.obj.metadata.name }}"
+               class="flex items-center gap-2 px-2 py-1.5 rounded no-underline transition-colors hover:bg-white/5"
+               style="color:#e2e8f0;">
+              <span class="badge badge-{{ dep.obj.kind | lower }} text-xs px-1.5 py-0.5 rounded" style="font-size:10px;">{{ dep.obj.kind }}</span>
+              <span class="text-xs truncate">{{ dep.obj.metadata.title }}</span>
+            </a>
+            {% else %}
+            <span class="text-xs block px-2 py-1" style="color:#ef4444;">⚠ {{ dep.ref }}</span>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="border-t mt-3 pt-3" style="border-color:#2e3347;">
+          <div class="font-mono text-xs break-all" style="color:#5a6478;">{{ obj.source_file }}</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Таб: Связи ── -->
+  {% if resolved_deps or dependents or provides_apis %}
+  <div x-show="tab === 'relations'">
+
+    {# Макрос: карточка связи #}
+    {# При > 8 элементов в секции используем компактный список #}
+
+    <!-- Секция: Использует (зависимости) -->
+    {% if resolved_deps %}
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs font-semibold uppercase" style="color:#5a6478; letter-spacing:0.07em;">Использует</span>
+        <span class="text-xs px-1.5 py-0.5 rounded" style="background:#252836; color:#8892a4;">{{ resolved_deps | length }}</span>
+        <span class="text-xs" style="color:#5a6478;">— этот объект зависит от:</span>
+      </div>
+      {% if resolved_deps | length > 8 %}
+      <!-- Компактный список для большого количества -->
+      <div class="rounded-lg border divide-y" style="background:#1a1d27; border-color:#2e3347; --tw-divide-opacity:1;">
+        {% for dep in resolved_deps %}
+        {% if dep.obj %}
+        <a href="/catalog/{{ dep.obj.kind | lower }}/{{ dep.obj.metadata.name }}"
+           class="flex items-center gap-3 px-4 py-2.5 no-underline transition-colors hover:bg-white/5">
+          <span class="badge badge-{{ dep.obj.kind | lower }} text-xs px-1.5 py-0.5 rounded shrink-0" style="font-size:10px;">{{ dep.obj.kind }}</span>
+          <span class="text-sm font-medium truncate" style="color:#e2e8f0;">{{ dep.obj.metadata.title }}</span>
+          <span class="font-mono text-xs ml-auto shrink-0" style="color:#5a6478;">{{ dep.obj.metadata.name }}</span>
+          {% if dep.obj.spec.lifecycle %}
+          <span class="lc lc-{{ dep.obj.spec.lifecycle }} text-xs font-semibold uppercase shrink-0">{{ dep.obj.spec.lifecycle }}</span>
+          {% endif %}
+        </a>
+        {% else %}
+        <div class="flex items-center gap-3 px-4 py-2.5 text-xs" style="color:#ef4444;">⚠ Не найдено: {{ dep.ref }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <!-- Карточки для небольшого количества -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for dep in resolved_deps %}
+        {% if dep.obj %}
+        <a href="/catalog/{{ dep.obj.kind | lower }}/{{ dep.obj.metadata.name }}" class="block no-underline group">
+          <div class="rounded-lg border p-4 transition-colors group-hover:border-indigo-500" style="background:#252836; border-color:#2e3347;">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-{{ dep.obj.kind | lower }} text-xs font-semibold uppercase px-2 py-0.5 rounded">{{ dep.obj.kind }}</span>
+              {% if dep.obj.spec.lifecycle %}
+              <span class="lc lc-{{ dep.obj.spec.lifecycle }} text-xs font-semibold uppercase">{{ dep.obj.spec.lifecycle }}</span>
+              {% endif %}
+            </div>
+            <h3 class="font-semibold text-sm" style="color:#e2e8f0;">{{ dep.obj.metadata.title }}</h3>
+            <p class="font-mono text-xs mt-0.5" style="color:#5a6478;">{{ dep.obj.metadata.name }}</p>
+            {% if dep.obj.metadata.description %}
+            <p class="text-xs mt-2 line-clamp-2" style="color:#8892a4;">{{ dep.obj.metadata.description }}</p>
+            {% endif %}
+          </div>
+        </a>
+        {% else %}
+        <div class="rounded-lg border p-4 text-sm" style="background:#1a1d27; border-color:#ef4444; color:#ef4444;">⚠ Не найдено: {{ dep.ref }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Секция: Предоставляет APIs -->
+    {% if provides_apis %}
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs font-semibold uppercase" style="color:#5a6478; letter-spacing:0.07em;">Предоставляет API</span>
+        <span class="text-xs px-1.5 py-0.5 rounded" style="background:#252836; color:#8892a4;">{{ provides_apis | length }}</span>
+      </div>
+      {% if provides_apis | length > 8 %}
+      <div class="rounded-lg border divide-y" style="background:#1a1d27; border-color:#2e3347; --tw-divide-opacity:1;">
+        {% for api in provides_apis %}
+        {% if api.obj %}
+        <a href="/catalog/api/{{ api.obj.metadata.name }}"
+           class="flex items-center gap-3 px-4 py-2.5 no-underline transition-colors hover:bg-white/5">
+          <span class="badge badge-api text-xs px-1.5 py-0.5 rounded shrink-0" style="font-size:10px;">⇄ API</span>
+          <span class="text-sm font-medium truncate" style="color:#e2e8f0;">{{ api.obj.metadata.title }}</span>
+          <span class="font-mono text-xs ml-auto shrink-0" style="color:#5a6478;">{{ api.obj.metadata.name }}</span>
+          {% if api.obj.spec.get('type') %}
+          <span class="text-xs px-1.5 py-0.5 rounded border shrink-0" style="background:#252836; border-color:#2e3347; color:#8892a4;">{{ api.obj.spec.type }}</span>
+          {% endif %}
+        </a>
+        {% else %}
+        <div class="flex items-center gap-3 px-4 py-2.5 text-xs" style="color:#ef4444;">⚠ Не найдено: {{ api.ref }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for api in provides_apis %}
+        {% if api.obj %}
+        <a href="/catalog/api/{{ api.obj.metadata.name }}" class="block no-underline group">
+          <div class="rounded-lg border p-4 transition-colors group-hover:border-indigo-500" style="background:#252836; border-color:#2e3347;">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-api text-xs font-semibold uppercase px-2 py-0.5 rounded">⇄ API</span>
+              {% if api.obj.spec.get('type') %}
+              <span class="text-xs px-1.5 py-0.5 rounded border" style="background:#1a1d27; border-color:#2e3347; color:#8892a4;">{{ api.obj.spec.type }}</span>
+              {% endif %}
+            </div>
+            <h3 class="font-semibold text-sm" style="color:#e2e8f0;">{{ api.obj.metadata.title }}</h3>
+            <p class="font-mono text-xs mt-0.5" style="color:#5a6478;">{{ api.obj.metadata.name }}</p>
+            {% if api.obj.metadata.description %}
+            <p class="text-xs mt-2 line-clamp-2" style="color:#8892a4;">{{ api.obj.metadata.description }}</p>
+            {% endif %}
+          </div>
+        </a>
+        {% else %}
+        <div class="rounded-lg border p-4 text-sm" style="background:#1a1d27; border-color:#ef4444; color:#ef4444;">⚠ Не найдено: {{ api.ref }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Секция: Используется в (обратные зависимости) -->
+    {% if dependents %}
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs font-semibold uppercase" style="color:#5a6478; letter-spacing:0.07em;">Используется в</span>
+        <span class="text-xs px-1.5 py-0.5 rounded" style="background:#252836; color:#8892a4;">{{ dependents | length }}</span>
+        <span class="text-xs" style="color:#5a6478;">— эти объекты зависят от текущего:</span>
+      </div>
+      {% if dependents | length > 8 %}
+      <div class="rounded-lg border divide-y" style="background:#1a1d27; border-color:#2e3347; --tw-divide-opacity:1;">
+        {% for dep in dependents %}
+        <a href="/catalog/{{ dep.kind | lower }}/{{ dep.metadata.name }}"
+           class="flex items-center gap-3 px-4 py-2.5 no-underline transition-colors hover:bg-white/5">
+          <span class="badge badge-{{ dep.kind | lower }} text-xs px-1.5 py-0.5 rounded shrink-0" style="font-size:10px;">{{ kind_icons.get(dep.kind, '○') }} {{ dep.kind }}</span>
+          <span class="text-sm font-medium truncate" style="color:#e2e8f0;">{{ dep.metadata.title }}</span>
+          <span class="font-mono text-xs ml-auto shrink-0" style="color:#5a6478;">{{ dep.metadata.name }}</span>
+          {% if dep.spec.lifecycle %}
+          <span class="lc lc-{{ dep.spec.lifecycle }} text-xs font-semibold uppercase shrink-0">{{ dep.spec.lifecycle }}</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for dep in dependents %}
+        <a href="/catalog/{{ dep.kind | lower }}/{{ dep.metadata.name }}" class="block no-underline group">
+          <div class="rounded-lg border p-4 transition-colors group-hover:border-indigo-500" style="background:#252836; border-color:#2e3347;">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-{{ dep.kind | lower }} text-xs font-semibold uppercase px-2 py-0.5 rounded">{{ kind_icons.get(dep.kind, '○') }} {{ dep.kind }}</span>
+              {% if dep.spec.lifecycle %}
+              <span class="lc lc-{{ dep.spec.lifecycle }} text-xs font-semibold uppercase">{{ dep.spec.lifecycle }}</span>
+              {% endif %}
+            </div>
+            <h3 class="font-semibold text-sm" style="color:#e2e8f0;">{{ dep.metadata.title }}</h3>
+            <p class="font-mono text-xs mt-0.5" style="color:#5a6478;">{{ dep.metadata.name }}</p>
+            {% if dep.metadata.description %}
+            <p class="text-xs mt-2 line-clamp-2" style="color:#8892a4;">{{ dep.metadata.description }}</p>
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Пустое состояние (не должно показываться, но на всякий случай) -->
+    {% if not resolved_deps and not provides_apis and not dependents %}
+    <div class="text-sm text-center py-12" style="color:#5a6478;">Связей не найдено</div>
+    {% endif %}
+
+  </div>
+  {% endif %}
+
+  <!-- ── Таб: Deployments ── -->
+  {% if obj.spec.get('deployments') %}
+  <div x-show="tab === 'deploy'" class="space-y-2">
+    {% for d in obj.spec.deployments %}
+    {% set status = d.get('status', 'unknown') %}
+    <div class="rounded-lg border p-4 flex items-center gap-3" style="background:#1a1d27; border-color:#2e3347;">
+      <span class="status-dot status-{{ status }} w-2 h-2 rounded-full shrink-0 inline-block"></span>
+      <div class="flex-1">
+        <div class="flex items-center gap-2">
+          <strong class="text-sm" style="color:#e2e8f0;">{{ d.host }}</strong>
+          <span class="deploy-status-{{ status }} text-xs px-1.5 py-0.5 rounded border">{{ status }}</span>
+        </div>
+        {% if d.get('url') %}
+        <a href="{{ d.url }}" target="_blank" class="text-xs block mt-1 no-underline" style="color:#6366f1;">↗ {{ d.url }}</a>
+        {% endif %}
+        {% if d.get('database') %}
+        <p class="text-xs mt-1" style="color:#8892a4;">БД: {{ d.database }}</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Таб: Участники ── -->
+  {% if obj.spec.get('members') %}
+  <div x-show="tab === 'members'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    {% for m in obj.spec.members %}
+    <div class="rounded-lg border p-4 flex items-center gap-3" style="background:#1a1d27; border-color:#2e3347;">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+           style="background:#1e2045; color:#818cf8; border:1px solid #3d4460;">
+        {{ m.name[0] | upper }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-sm truncate" style="color:#e2e8f0;">{{ m.name }}</h3>
+        {% if m.get('email') %}
+        <div class="text-xs mt-0.5" style="color:#5a6478;">{{ m.email }}</div>
+        {% endif %}
+      </div>
+      {% if m.get('role') %}
+      <span class="text-xs px-1.5 py-0.5 rounded border shrink-0"
+            style="background:#252836; border-color:#2e3347; color:#8892a4;">{{ m.role }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

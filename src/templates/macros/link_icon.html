@@ -1,0 +1,23 @@
+{# Макрос: иконка ссылки по link.icon или автодетекту URL #}
+{%- macro link_icon(link) -%}
+  {%- set icon_key = link.icon if link.icon else '' -%}
+  {%- if not icon_key -%}
+    {%- set url_str = link.url | string | lower -%}
+    {%- if 'github.com' in url_str -%}{%- set icon_key = 'github' -%}
+    {%- elif 'gitlab' in url_str -%}{%- set icon_key = 'gitlab' -%}
+    {%- elif 'gitea' in url_str -%}{%- set icon_key = 'gitea' -%}
+    {%- elif 'bitbucket' in url_str -%}{%- set icon_key = 'git' -%}
+    {%- elif 'grafana' in url_str -%}{%- set icon_key = 'grafana' -%}
+    {%- elif 'sentry' in url_str -%}{%- set icon_key = 'sentry' -%}
+    {%- elif 'confluence' in url_str -%}{%- set icon_key = 'confluence' -%}
+    {%- elif 'jira' in url_str or 'atlassian' in url_str -%}{%- set icon_key = 'jira' -%}
+    {%- else -%}{%- set icon_key = 'link' -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if icon_key == 'git' -%}{%- set icon_key = 'gitea' -%}{%- endif -%}
+  {%- if icon_key in ('docs', 'documentation') -%}{%- set icon_key = 'docs' -%}{%- endif -%}
+  {%- if icon_key not in ('github', 'gitlab', 'gitea', 'grafana', 'sentry', 'confluence', 'jira', 'docs') -%}
+    {%- set icon_key = 'link' -%}
+  {%- endif -%}
+  <img class="link-icon" src="/static/icons/{{ icon_key }}.svg" alt="{{ icon_key }}" loading="lazy">
+{%- endmacro -%}

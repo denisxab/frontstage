@@ -1,0 +1,24 @@
+# Пример: kind: Team
+# Описывает команду и её участников
+
+apiVersion: frontstage/v1
+kind: Team
+metadata:
+  name: backend
+  title: "Backend Team"
+  description: "Отвечает за все серверные сервисы и API"
+  links:
+    - title: "Slack"
+      url: https://slack.example.com/channels/backend
+
+spec:
+  members:
+    - name: "Иван Иванов"
+      email: ivan@example.com
+      role: lead                        # lead | developer | qa | devops | ...
+    - name: "Петр Петров"
+      email: petr@example.com
+      role: developer
+    - name: "Анна Сидорова"
+      email: anna@example.com
+      role: developer

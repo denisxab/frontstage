@@ -1,0 +1,27 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: user-service
+  title: "User Service"
+  description: "Аутентификация и управление пользователями: врачи, администраторы клиник, менеджеры"
+  tags: [python, fastapi, auth, jwt]
+  links:
+    - title: "Репозиторий"
+      url: https://git.beautytech.ru/backend/user-service
+    - title: "Grafana"
+      url: https://grafana.beautytech.ru/d/user-service
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: backend
+  dependsOn:
+    - database:users-postgres
+    - database:session-redis
+    - service:admin-panel
+  providesApis:
+    - api:public-rest-api
+    - api:internal-grpc
+  deployments:
+    - host: german
+      url: https://auth.beautytech.ru
+      status: healthy

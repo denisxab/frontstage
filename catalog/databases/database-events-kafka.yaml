@@ -1,0 +1,14 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: events-kafka
+  title: "Events Kafka"
+  description: "Шина событий: действия клиентов для ESP-триггеров, изменения заказов, склада"
+  tags: [kafka, events, esp, streaming]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: kafka
+  version: "3.6"
+  deployments:
+    - host: rus

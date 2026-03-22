@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ kind }}s — FrontStage{% endblock %}
+
+{% block content %}
+<script>
+  window._catalogObjects = {{ objects | tojson }};
+</script>
+
+<div x-data="{
+  search: '',
+  objects: window._catalogObjects,
+  get filtered() {
+    const q = this.search.toLowerCase();
+    return !q ? this.objects : this.objects.filter(o =>
+      o.metadata.name.includes(q) ||
+      o.metadata.title.toLowerCase().includes(q) ||
+      (o.metadata.description || '').toLowerCase().includes(q) ||
+      (o.metadata.tags || []).some(t => t.includes(q))
+    );
+  }
+}">
+
+  <!-- Топбар -->
+  <div class="topbar flex items-center justify-between px-6 h-12 border-b" style="background:#1a1d27; border-color:#2e3347;">
+    <div class="flex items-center gap-3">
+      <span class="badge badge-{{ kind | lower }} text-xs font-semibold uppercase px-2 py-0.5 rounded">{{ kind }}</span>
+      <span class="text-sm font-semibold" style="color:#e2e8f0;"
+            x-text="filtered.length + ' ' + (filtered.length === 1 ? 'объект' : filtered.length < 5 ? 'объекта' : 'объектов')"></span>
+    </div>
+    <a href="/" class="px-3 py-1 rounded text-xs border no-underline transition-colors"
+       style="border-color:#2e3347; color:#8892a4;">← Все объекты</a>
+  </div>
+
+  <div class="p-6">
+
+    <div class="relative mb-6" style="max-width:400px;">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#5a6478;">⌕</span>
+      <input x-model="search" type="text" placeholder="Поиск…" autofocus
+             class="w-full pl-8 pr-3 py-1.5 rounded text-sm outline-none transition-colors"
+             style="background:#252836; border:1px solid #2e3347; color:#e2e8f0;"
+             onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#2e3347'" />
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <template x-for="obj in filtered" :key="obj.metadata.name">
+        <a :href="'/catalog/{{ kind | lower }}/' + obj.metadata.name" class="block no-underline group">
+          <div class="h-full rounded-lg border p-4 transition-colors group-hover:border-indigo-500"
+               style="background:#1a1d27; border-color:#2e3347;">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-semibold uppercase lc"
+                    :class="'lc-' + (obj.spec.lifecycle || '')"
+                    x-show="obj.spec.lifecycle" x-text="obj.spec.lifecycle"></span>
+              <span class="ml-auto text-xs" style="color:#5a6478;" x-show="obj.spec.type" x-text="obj.spec.type"></span>
+            </div>
+            <h3 class="font-semibold text-sm truncate mb-0.5" style="color:#e2e8f0;" x-text="obj.metadata.title"></h3>
+            <p class="font-mono text-xs" style="color:#5a6478;" x-text="obj.metadata.name"></p>
+            <p class="text-xs mt-2 line-clamp-2" style="color:#8892a4;"
+               x-show="obj.metadata.description" x-text="obj.metadata.description"></p>
+            <div class="flex items-center justify-between mt-3 gap-2">
+              <div class="flex flex-wrap gap-1" x-show="obj.metadata.tags && obj.metadata.tags.length">
+                <template x-for="tag in (obj.metadata.tags || []).slice(0,3)" :key="tag">
+                  <span class="text-xs px-1.5 py-0.5 rounded border"
+                        style="background:#252836; border-color:#2e3347; color:#8892a4;" x-text="tag"></span>
+                </template>
+              </div>
+              <span class="text-xs shrink-0" style="color:#5a6478;" x-show="obj.spec.owner" x-text="obj.spec.owner"></span>
+            </div>
+          </div>
+        </a>
+      </template>
+    </div>
+
+    <div x-show="filtered.length === 0" class="text-center py-16">
+      <div class="text-4xl mb-3 opacity-30">◌</div>
+      <p class="text-sm" style="color:#8892a4;">Ничего не найдено</p>
+      <button class="mt-3 px-4 py-1.5 rounded text-xs border cursor-pointer"
+              style="border-color:#2e3347; color:#8892a4;"
+              x-show="search" @click="search = ''">Сбросить поиск</button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: orders-postgres
+  title: "Orders PostgreSQL"
+  description: "Заказы на закупку косметических препаратов и расходников, статусы поставок"
+  tags: [postgresql, orders, procurement, logistics]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: postgresql
+  version: "15.4"
+  deployments:
+    - host: german
+      database: beautytech_orders

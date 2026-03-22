@@ -1,0 +1,15 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: users-postgres
+  title: "Users PostgreSQL"
+  description: "Учётные данные сотрудников клиник, ролевая модель доступа, аутентификация"
+  tags: [postgresql, users, auth, crm]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: postgresql
+  version: "15.4"
+  deployments:
+    - host: german
+      database: beautytech_users

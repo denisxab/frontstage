@@ -1,0 +1,21 @@
+apiVersion: frontstage/v1
+kind: Team
+metadata:
+  name: frontend
+  title: "Frontend Team"
+  description: "Веб-интерфейсы: личный кабинет клиента, панель администратора клиники, B2B-портал"
+  tags: [typescript, vue, tailwind]
+  links:
+    - title: "Figma"
+      url: https://figma.com/beautytech-design
+spec:
+  members:
+    - name: "Ольга Новикова"
+      email: "o.novikova@beautytech.ru"
+      role: lead
+    - name: "Дмитрий Воронов"
+      email: "d.voronov@beautytech.ru"
+      role: developer
+    - name: "Анна Белова"
+      email: "a.belova@beautytech.ru"
+      role: developer

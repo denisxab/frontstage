@@ -1,0 +1,17 @@
+apiVersion: frontstage/v1
+kind: Library
+metadata:
+  name: auth-sdk
+  title: "Auth SDK"
+  description: "Общая библиотека аутентификации и авторизации для всех Python-сервисов (JWT, OAuth2, RBAC)"
+  tags: [python, auth, jwt, oauth2, rbac]
+  links:
+    - title: "PyPI (internal)"
+      url: https://pypi.beautytech.ru/auth-sdk
+    - title: "Репозиторий"
+      url: https://git.beautytech.ru/libs/auth-sdk
+spec:
+  lifecycle: production
+  owner: team:backend
+  language: python
+  version: "2.3.1"

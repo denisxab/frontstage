@@ -1,0 +1,17 @@
+apiVersion: frontstage/v1
+kind: Library
+metadata:
+  name: ui-kit
+  title: "BeautyTech UI Kit"
+  description: "Переиспользуемые Vue-компоненты в фирменном стиле: кнопки, формы, таблицы, модалки"
+  tags: [typescript, vue, tailwind, components, design-system]
+  links:
+    - title: "Storybook"
+      url: https://storybook.beautytech.ru
+    - title: "npm (internal)"
+      url: https://npm.beautytech.ru/ui-kit
+spec:
+  lifecycle: production
+  owner: team:frontend
+  language: typescript
+  version: "3.0.2"

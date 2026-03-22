@@ -1,0 +1,23 @@
+# Пример: kind: Database
+# Описывает базу данных или хранилище данных
+
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: users-postgres
+  title: "Users PostgreSQL"
+  description: "Основная БД сервиса пользователей"
+  tags: [postgres, sql]
+  links:
+    - title: "Adminer"
+      url: https://adminer.example.com
+
+spec:
+  lifecycle: production
+  owner: team:devops
+  engine: postgresql # postgresql | mysql | redis | mongodb | sqlite | elasticsearch
+  version: "15"
+
+  deployments:
+    - host: german
+      database: users_db # имя базы данных на хосте

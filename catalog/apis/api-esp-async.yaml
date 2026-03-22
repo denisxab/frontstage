@@ -1,0 +1,14 @@
+apiVersion: frontstage/v1
+kind: API
+metadata:
+  name: esp-async
+  title: "ESP Events API (async)"
+  description: "Асинхронный интерфейс отправки триггерных событий в ESP: визит, покупка, брошенная запись"
+  tags: [kafka, async, esp, events, email-marketing]
+  links:
+    - title: "Репозиторий"
+      url: https://gitea.gerland.duckdns.org/denisxab/bashler
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: async

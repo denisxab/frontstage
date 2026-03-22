@@ -1,0 +1,23 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: admin-panel
+  title: "Admin Panel"
+  description: "Панель управления для менеджеров клиники: расписание, закупки, отчёты, настройки ESP"
+  tags: [typescript, vue, tailwind, admin]
+  links:
+    - title: "Prod"
+      url: https://admin.beautytech.ru
+    - title: "Репозиторий"
+      url: https://gitea.gerland.duckdns.org/denisxab/agents
+spec:
+  lifecycle: production
+  owner: team:frontend
+  type: frontend
+  dependsOn:
+    - api:public-rest-api
+    - api:procurement-rest-api
+  deployments:
+    - host: german
+      url: https://admin.beautytech.ru
+      status: healthy

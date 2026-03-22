@@ -1,0 +1,18 @@
+apiVersion: frontstage/v1
+kind: API
+metadata:
+  name: public-rest-api
+  title: "Public REST API v2"
+  description: "Внешний REST API для мобильного приложения клиентов и B2B-партнёров (запись на процедуры, каталог услуг)"
+  tags: [rest, public, v2, mobile, b2b]
+  links:
+    - title: "Swagger UI"
+      url: https://api.beautytech.ru/docs
+    - title: "Postman Collection"
+      url: https://postman.beautytech.ru/public-api
+spec:
+  lifecycle: production
+  owner: team:backend
+  type: rest
+  definition:
+    url: https://api.beautytech.ru/openapi.json

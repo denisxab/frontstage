@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(poetry run:*)",
+      "Bash(poetry add:*)",
+      "Bash(poetry install:*)",
+      "Bash(git diff:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/run_tests.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+apiVersion: frontstage/v1
+kind: Database
+metadata:
+  name: session-redis
+  title: "Session Redis"
+  description: "Кеш сессий, очередь задач (Celery), временные токены сброса пароля"
+  tags: [redis, cache, sessions, celery]
+spec:
+  lifecycle: production
+  owner: team:backend
+  engine: redis
+  version: "7.2"
+  deployments:
+    - host: german

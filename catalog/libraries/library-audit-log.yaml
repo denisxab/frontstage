@@ -1,0 +1,15 @@
+apiVersion: frontstage/v1
+kind: Library
+metadata:
+  name: audit-log
+  title: "Audit Log"
+  description: "Логирование изменений в медицинских данных клиентов: кто, когда, что изменил (требование PDPA)"
+  tags: [python, audit, compliance, logging]
+  links:
+    - title: "PyPI (internal)"
+      url: https://pypi.beautytech.ru/audit-log
+spec:
+  lifecycle: production
+  owner: team:backend
+  language: python
+  version: "1.1.0"

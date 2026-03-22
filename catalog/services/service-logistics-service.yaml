@@ -1,0 +1,21 @@
+apiVersion: frontstage/v1
+kind: Service
+metadata:
+  name: logistics-service
+  title: "Logistics Service"
+  description: "Отслеживание поставок от поставщиков в клиники: трекинг, статусы, уведомления о доставке"
+  tags: [python, fastapi, logistics, delivery]
+  links:
+    - title: "Репозиторий"
+      url: https://git.beautytech.ru/backend/logistics-service
+spec:
+  lifecycle: staging
+  owner: team:backend
+  type: backend
+  dependsOn:
+    - database:orders-postgres
+    - database:events-kafka
+    - api:internal-grpc
+  deployments:
+    - host: rus
+      status: degraded
